@@ -19,6 +19,10 @@ import com.chat.api.services.UserService;
 
 public final class Utilities {
 	
+	public static String UPLOAD_PATH = System.getProperty("user.dir")+System.getProperty("file.separator")+"src"+
+	System.getProperty("file.separator")+"main"+System.getProperty("file.separator")+"resources"+
+			System.getProperty("file.separator")+"uploads";
+	
 	/**
 	 * Get current connected user if exist
 	 * @return User 
