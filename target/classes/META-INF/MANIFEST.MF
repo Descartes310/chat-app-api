@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
-Build-Jdk-Spec: 11
-Implementation-Title: Geloka API
+Implementation-Title: Chat API
 Implementation-Version: 1.0.0
-Implementation-Vendor: Pivotal Software, Inc.
+Build-Jdk-Spec: 1.8
 Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
 
