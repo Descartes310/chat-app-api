@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GelokaApplication {
+public class ChatApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GelokaApplication.class, args);
+		SpringApplication.run(ChatApplication.class, args);
 	}
 }
