@@ -15,6 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name="messages")
 public class Message implements Serializable{
@@ -45,6 +47,7 @@ public class Message implements Serializable{
 	private MessageType messageType;
 	
 	@ManyToOne
+	@JsonIgnore
 	@JoinColumn(name="chat_id", nullable=false)
 	private Chat chat;	
 	

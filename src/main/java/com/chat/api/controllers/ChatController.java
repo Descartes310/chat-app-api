@@ -61,6 +61,9 @@ public class ChatController {
 
 		if (user == null)
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Logged user was not found");
+		
+		if (user.getId().equals(interlocuter_id))
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "You cannot start a chat with you");
 
 		User interlocuter = this.userService.getOne(interlocuter_id);
 
@@ -83,8 +86,8 @@ public class ChatController {
 	}
 
 	@PostMapping("{id}/messages")
-	public ResponseEntity<Message> createMessage(@PathVariable Long id, @RequestParam String content,
-			@RequestParam MultipartFile file) {
+	public ResponseEntity<Message> createMessage(@PathVariable Long id, @RequestParam(required = false) String content,
+			@RequestParam(required = false) MultipartFile file) {
 
 		User user = Utilities.getLoggedUser(userService);
 

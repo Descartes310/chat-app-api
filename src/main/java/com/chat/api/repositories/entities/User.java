@@ -28,7 +28,8 @@ public class User implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id")
 	@SequenceGenerator(name = "user_id", sequenceName = "user_id", allocationSize = 1)
 	private Long id;
-	
+
+	@JsonIgnore
 	@Column(unique = true, nullable=false)
 	private String login;
 	
@@ -42,10 +43,12 @@ public class User implements Serializable {
 	@Column(nullable=false)
 	@ApiModelProperty(hidden = true)
 	private String password;
-	
+
+	@JsonIgnore
 	@Column(unique = false, nullable = false)
 	private Timestamp createdAt;
 
+	@JsonIgnore
 	@Column(unique = false, nullable = false)
 	private Timestamp updatedAt;
 
