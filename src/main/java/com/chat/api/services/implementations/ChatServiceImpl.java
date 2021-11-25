@@ -36,7 +36,7 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public List<Chat> findByUsers(List<User> users) {
-		return this.chatRepository.findByUsers(users);
+		return this.chatRepository.findByUsersIn(users);
 	}
 	
 }

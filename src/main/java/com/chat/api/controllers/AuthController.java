@@ -55,6 +55,8 @@ public class AuthController {
 		user.setLogin(login);
 		user.setFullName(fullName);
 		user.setPassword(this.bCryptPasswordEncoder.encode(password));
+		
+		user = this.userService.save(user);
 
 		// Generating access token for created user
 		OAuth2AccessToken userToken = Utilities.createAccessToken(this.defaultTokenServices, user);
