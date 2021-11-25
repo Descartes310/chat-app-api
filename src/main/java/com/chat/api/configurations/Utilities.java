@@ -34,7 +34,7 @@ public final class Utilities {
 	}	
 	
 	//Create a new access token
-	public static OAuth2AccessToken getAccessTokenForZenoyeLearningApp(DefaultTokenServices tokenServices, User user) {
+	public static OAuth2AccessToken createAccessToken(DefaultTokenServices tokenServices, User user) {
     	return getAccessToken(tokenServices, user, "chat-app");
     }
     
