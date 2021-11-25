@@ -1,5 +1,7 @@
 package com.chat.api.services.implementations;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.chat.api.repositories.UserRepository;
@@ -23,6 +25,11 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public User findByLogin(String login) {
 		return this.userRepository.findByLogin(login);
+	}
+
+	@Override
+	public List<User> findAll() {
+		return this.userRepository.findAll();
 	}
 
 }
