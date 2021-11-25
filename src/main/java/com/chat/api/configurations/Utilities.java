@@ -23,6 +23,10 @@ public final class Utilities {
 	System.getProperty("file.separator")+"main"+System.getProperty("file.separator")+"resources"+
 			System.getProperty("file.separator")+"uploads";
 	
+	public static final String KAFKA_TOPIC = "kafka-chat";
+    public static final String GROUP_ID = "kafka-sandbox";
+    public static final String KAFKA_BROKER = "localhost:9092";
+	
 	/**
 	 * Get current connected user if exist
 	 * @return User 

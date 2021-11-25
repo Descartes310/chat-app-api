@@ -4,6 +4,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,12 +39,14 @@ public class ChatController {
 	private ChatService chatService;
 	private UploadService uploadService;
 	private MessageService messageService;
+	private KafkaTemplate<String, Message> kafkaTemplate;
 
 	public ChatController(UserService userService, ChatService chatService, UploadService uploadService,
-			MessageService messageService) {
+			MessageService messageService, KafkaTemplate<String, Message> kafkaTemplate) {
 		this.userService = userService;
 		this.chatService = chatService;
 		this.uploadService = uploadService;
+		this.kafkaTemplate = kafkaTemplate;
 		this.messageService = messageService;
 	}
 
@@ -86,7 +93,7 @@ public class ChatController {
 	}
 
 	@PostMapping("{id}/messages")
-	public ResponseEntity<Message> createMessage(@PathVariable Long id, @RequestParam(required = false) String content,
+	public void createMessage(@PathVariable Long id, @RequestParam(required = false) String content,
 			@RequestParam(required = false) MultipartFile file) {
 
 		User user = Utilities.getLoggedUser(userService);
@@ -115,8 +122,13 @@ public class ChatController {
 		message.setMessageType(file != null ? MessageType.FILE : MessageType.TEXT);
 
 		message = this.messageService.save(message);
-
-		return new ResponseEntity<Message>(message, HttpStatus.CREATED);
+		
+		try {
+            //Sending the message to kafka topic queue
+            this.kafkaTemplate.send(Utilities.KAFKA_TOPIC, message).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 	}
 
 	@GetMapping("{id}/messages")
@@ -131,5 +143,22 @@ public class ChatController {
 		return new ResponseEntity<List<Message>>(this.messageService.findByChat(chat), HttpStatus.OK);
 
 	}
+	
+    //    -------------- WebSocket API ----------------
+    @MessageMapping("/sendMessage")
+    @SendTo("/topic/group")
+    public Message broadcastGroupMessage(@Payload Message message) {
+        //Sending this message to all the subscribers
+        return message;
+    }
+
+    @MessageMapping("/newUser")
+    @SendTo("/topic/group")
+    public Message addUser(@Payload Message message,
+                           SimpMessageHeaderAccessor headerAccessor) {
+        // Add user in web socket session
+        headerAccessor.getSessionAttributes().put("username", message.getSender());
+        return message;
+    }
 
 }

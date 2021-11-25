@@ -118,5 +118,13 @@ public class Message implements Serializable{
 	public void setMessageType(MessageType messageType) {
 		this.messageType = messageType;
 	}
+	
+    @Override
+    public String toString() {
+        return "Message{" +
+                "sender='" + sender.getFullName() + '\'' +
+                ", content='" + content + '\'' +
+                '}';
+    }
 
 }
