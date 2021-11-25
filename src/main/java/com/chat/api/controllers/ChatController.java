@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.chat.api.configurations.UploadService;
 import com.chat.api.configurations.Utilities;
 import com.chat.api.repositories.entities.Chat;
 import com.chat.api.repositories.entities.Message;
@@ -31,11 +32,14 @@ public class ChatController {
 
 	private UserService userService;
 	private ChatService chatService;
+	private UploadService uploadService;
 	private MessageService messageService;
 
-	public ChatController(UserService userService, ChatService chatService, MessageService messageService) {
+	public ChatController(UserService userService, ChatService chatService, UploadService uploadService,
+			MessageService messageService) {
 		this.userService = userService;
 		this.chatService = chatService;
+		this.uploadService = uploadService;
 		this.messageService = messageService;
 	}
 
@@ -75,11 +79,12 @@ public class ChatController {
 
 		chat = this.chatService.save(chat);
 
-		return new ResponseEntity<Chat>(chat, HttpStatus.OK);
+		return new ResponseEntity<Chat>(chat, HttpStatus.CREATED);
 	}
 
 	@PostMapping("{id}/messages")
-	public ResponseEntity<Message> createMessage(@PathVariable Long id, @RequestParam String content, @RequestParam MultipartFile file) {
+	public ResponseEntity<Message> createMessage(@PathVariable Long id, @RequestParam String content,
+			@RequestParam MultipartFile file) {
 
 		User user = Utilities.getLoggedUser(userService);
 
@@ -94,19 +99,34 @@ public class ChatController {
 
 		Message message = new Message();
 
-		message.setFile(file);
 		message.setChat(chat);
 		message.setSender(user);
 		message.setContent(content);
+
+		if (file != null) {
+			// Uploads file into the folder "files", the folder will be automatically
+			// created
+			message.setFile(this.uploadService.uploadFile(file, "files"));
+		}
+
 		message.setMessageType(file != null ? MessageType.FILE : MessageType.TEXT);
 
-		Chat chat = new Chat();
+		message = this.messageService.save(message);
 
-		chat.setUsers(List.of(user, interlocuter));
+		return new ResponseEntity<Message>(message, HttpStatus.CREATED);
+	}
 
-		chat = this.chatService.save(chat);
+	@GetMapping("{id}/messages")
+	public ResponseEntity<List<Message>> getMessages(@PathVariable Long id) {
 
-		return new ResponseEntity<Chat>(chat, HttpStatus.OK);
+		Chat chat = this.chatService.getOne(id);
+
+		if (chat == null)
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					String.format("The chat with id %d was not found", id));
+
+		return new ResponseEntity<List<Message>>(this.messageService.findByChat(chat), HttpStatus.OK);
+
 	}
 
 }
