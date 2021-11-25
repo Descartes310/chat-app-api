@@ -32,4 +32,9 @@ public class UserServiceImpl implements UserService{
 		return this.userRepository.findAll();
 	}
 
+	@Override
+	public User getOne(Long id) {
+		return this.userRepository.findById(id).orElse(null);
+	}
+
 }

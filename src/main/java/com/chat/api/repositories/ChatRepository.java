@@ -12,4 +12,6 @@ import com.chat.api.repositories.entities.User;
 public interface ChatRepository extends JpaRepository<Chat, Long>{
 	
 	List<Chat> findByUsers(User user);
+	
+	List<Chat> findByUsers(List<User> users);
 }

@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +18,11 @@ import javax.persistence.Table;
 @Entity
 @Table(name="messages")
 public class Message implements Serializable{
+	
+	public enum MessageType {
+		TEXT,
+		FILE
+	}
 
 	/**
 	 * 
@@ -32,6 +39,10 @@ public class Message implements Serializable{
 	
 	@Column(nullable=true)
 	private String file;
+	
+	@Column(nullable=false)
+	@Enumerated(EnumType.STRING)
+	private MessageType messageType;
 	
 	@ManyToOne
 	@JoinColumn(name="chat_id", nullable=false)
@@ -95,6 +106,14 @@ public class Message implements Serializable{
 
 	public void setSender(User sender) {
 		this.sender = sender;
+	}
+
+	public MessageType getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType;
 	}
 
 }
