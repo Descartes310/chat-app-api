@@ -23,7 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService, Serializabl
 	private UserService userService;
 	
 	public CustomUserDetailsService(UserService userService) {
-		// TODO Auto-generated constructor stub
 		this.userService = userService;
 	}
 	

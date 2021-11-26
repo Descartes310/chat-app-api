@@ -1,5 +1,6 @@
 package com.chat.api.controllers;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -131,6 +132,9 @@ public class ChatController {
 		message.setMessageType(file != null ? MessageType.FILE : MessageType.TEXT);
 
 		message = this.messageService.save(message);
+		
+		chat.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+		this.chatService.save(chat);
 
 		try {
 			
@@ -155,6 +159,7 @@ public class ChatController {
 	}
 
 	// -------------- WebSocket API ----------------
+	
 	@MessageMapping("/sendMessage")
 	@SendTo("/topic/group")
 	public Message broadcastGroupMessage(@Payload Message message) {

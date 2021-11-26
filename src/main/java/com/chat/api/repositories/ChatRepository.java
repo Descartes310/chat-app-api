@@ -11,7 +11,5 @@ import com.chat.api.repositories.entities.User;
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long>{
 	
-	List<Chat> findByUsers(User user);
-	
-	List<Chat> findByUsersAndUsers(User user1, User user2);
+	List<Chat> findByUsersOrderByUpdatedAtDesc(User user);
 }

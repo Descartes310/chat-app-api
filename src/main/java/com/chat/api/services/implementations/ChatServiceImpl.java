@@ -31,12 +31,7 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public List<Chat> findByUsers(User user) {
-		return this.chatRepository.findByUsers(user);
-	}
-
-	@Override
-	public List<Chat> findByUsers(User u1, User u2) {
-		return this.chatRepository.findByUsersAndUsers(u1, u2);
+		return this.chatRepository.findByUsersOrderByUpdatedAtDesc(user);
 	}
 	
 }

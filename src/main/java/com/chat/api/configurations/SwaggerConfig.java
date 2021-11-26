@@ -37,7 +37,6 @@ public class SwaggerConfig {
 	public Docket api() {
 		return new Docket(DocumentationType.SWAGGER_2)
 				.apiInfo(apiInfo())
-//				.tags(tags()[0], tags())
 				.select()
 				.apis(RequestHandlerSelectors.basePackage("com.chat.api.controllers"))
 				.paths(PathSelectors.any())

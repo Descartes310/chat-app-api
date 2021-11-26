@@ -42,7 +42,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         TokenStore tokenStore = tokenStore();
     	endpoints
           .tokenStore(tokenStore)
-          //.userApprovalHandler(userApprovalHandler(tokenStore))
           .authenticationManager(authenticationManager);     	
     }
  
