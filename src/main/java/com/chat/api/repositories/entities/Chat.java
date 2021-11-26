@@ -16,8 +16,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name="chats")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Chat implements Serializable {
 
 	/**
@@ -35,7 +38,7 @@ public class Chat implements Serializable {
 			name = "chat_users", 
 			joinColumns = @JoinColumn(name = "chat_id"), 
 			inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private List<User> users = new ArrayList<User>();
+	private List<User> users = new ArrayList<User>();	
 	
 	@Column(unique = false, nullable = false)
 	private Timestamp createdAt;
@@ -79,6 +82,10 @@ public class Chat implements Serializable {
 
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 	
 }

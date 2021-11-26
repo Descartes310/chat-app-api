@@ -1,6 +1,7 @@
 package com.chat.api.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.chat.api.configurations.Utilities;
 import com.chat.api.repositories.entities.User;
+import com.chat.api.services.ChatService;
 import com.chat.api.services.UserService;
 
 import io.swagger.annotations.Api;
@@ -26,10 +28,12 @@ import io.swagger.annotations.ApiOperation;
 public class UserController {
 
 	private UserService userService;
+	private ChatService chatService;
 	private DefaultTokenServices defaultTokenServices;
 
-	public UserController(UserService userService, DefaultTokenServices defaultTokenServices) {
+	public UserController(UserService userService, ChatService chatService, DefaultTokenServices defaultTokenServices) {
 		this.userService = userService;
+		this.chatService = chatService;
 		this.defaultTokenServices = defaultTokenServices;
 	}
 
@@ -47,7 +51,17 @@ public class UserController {
 
 	@GetMapping
 	public ResponseEntity<List<User>> getUsers() {
-		return new ResponseEntity<List<User>>(this.userService.findAll(), HttpStatus.OK);
+		
+		User user = Utilities.getLoggedUser(userService);
+
+		if (user == null)
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Logged user was not found");
+		
+		//We only return users with no chat with logged user
+		
+		List<User> interlocutors = this.chatService.findByUsers(user).stream().map(c -> c.getUsers()).flatMap(List::stream).collect(Collectors.toList());
+		
+		return new ResponseEntity<List<User>>(this.userService.findAll().stream().filter(u -> !interlocutors.contains(u)).collect(Collectors.toList()), HttpStatus.OK);
 	}
 
 	@DeleteMapping("logout")

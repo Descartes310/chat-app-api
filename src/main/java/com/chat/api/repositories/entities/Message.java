@@ -15,10 +15,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name="messages")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Message implements Serializable{
 	
 	public enum MessageType {
@@ -47,7 +48,6 @@ public class Message implements Serializable{
 	private MessageType messageType;
 	
 	@ManyToOne
-	@JsonIgnore
 	@JoinColumn(name="chat_id", nullable=false)
 	private Chat chat;	
 	
@@ -126,5 +126,9 @@ public class Message implements Serializable{
                 ", content='" + content + '\'' +
                 '}';
     }
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 
 }

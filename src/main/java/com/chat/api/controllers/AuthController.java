@@ -42,7 +42,7 @@ public class AuthController {
 
 	@PostMapping("register")
 	@ApiOperation("Create user account")
-	public ResponseEntity<OAuth2AccessToken> userRegistration(@RequestParam String fullName, @RequestParam String login,
+	public ResponseEntity<OAuth2AccessToken> userRegistration(@RequestParam String full_name, @RequestParam String login,
 			@RequestParam String password) {
 
 		User user = new User();
@@ -53,7 +53,7 @@ public class AuthController {
 
 		user.setAvatar(null);
 		user.setLogin(login);
-		user.setFullName(fullName);
+		user.setFullName(full_name);
 		user.setPassword(this.bCryptPasswordEncoder.encode(password));
 		
 		user = this.userService.save(user);

@@ -11,5 +11,5 @@ import com.chat.api.repositories.entities.Message;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long>{
 
-	List<Message> findByChat(Chat chat);
+	List<Message> findByChatOrderByIdAsc(Chat chat);
 }

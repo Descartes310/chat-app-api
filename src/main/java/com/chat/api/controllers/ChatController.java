@@ -62,26 +62,28 @@ public class ChatController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Chat> createChat(@RequestParam Long interlocuter_id) {
+	public ResponseEntity<Chat> createChat(@RequestParam Long interlocutor_id) {
 
 		User user = Utilities.getLoggedUser(userService);
 
 		if (user == null)
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Logged user was not found");
-		
-		if (user.getId().equals(interlocuter_id))
+
+		if (user.getId().equals(interlocutor_id))
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "You cannot start a chat with you");
 
-		User interlocuter = this.userService.getOne(interlocuter_id);
+		User interlocuter = this.userService.getOne(interlocutor_id);
 
 		if (interlocuter == null)
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					String.format("The user with id %d was not found", interlocuter_id));
+					String.format("The user with id %d was not found", interlocutor_id));
 
 		// Checking if the chat already exists
-		List<Chat> chats = this.chatService.findByUsers(List.of(user, interlocuter));
-		if (chats.size() > 0)
-			return new ResponseEntity<Chat>(chats.get(0), HttpStatus.OK);
+		List<Chat> chats = this.chatService.findByUsers(user);
+		for(Chat c: chats) {
+			if(c.getUsers().contains(interlocuter))
+				return new ResponseEntity<Chat>(c, HttpStatus.OK);
+		}
 
 		Chat chat = new Chat();
 
@@ -94,18 +96,25 @@ public class ChatController {
 
 	@PostMapping("{id}/messages")
 	public void createMessage(@PathVariable Long id, @RequestParam(required = false) String content,
-			@RequestParam(required = false) MultipartFile file) {
+			@RequestParam(required = false) Long interlocutor_id, @RequestParam(required = false) MultipartFile file) {
 
 		User user = Utilities.getLoggedUser(userService);
 
 		if (user == null)
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Logged user was not found");
 
-		Chat chat = this.chatService.getOne(id);
+		Chat chat = null;
 
-		if (chat == null)
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					String.format("The chat with id %d was not found", id));
+		// if id = 0, we need to create a new chat before processing
+		if (id != 0) {
+			chat = this.chatService.getOne(id);
+
+			if (chat == null)
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+						String.format("The chat with id %d was not found", id));
+		} else {
+			chat = this.createChat(interlocutor_id).getBody();
+		}
 
 		Message message = new Message();
 
@@ -114,21 +123,22 @@ public class ChatController {
 		message.setContent(content);
 
 		if (file != null) {
-			// Uploads file into the folder "files", the folder will be automatically
+			// Uploads file into the folder "messages", the folder will be automatically
 			// created
-			message.setFile(this.uploadService.uploadFile(file, "files"));
+			message.setFile(this.uploadService.uploadFile(file, "messages"));
 		}
 
 		message.setMessageType(file != null ? MessageType.FILE : MessageType.TEXT);
 
 		message = this.messageService.save(message);
-		
+
 		try {
-            //Sending the message to kafka topic queue
-            this.kafkaTemplate.send(Utilities.KAFKA_TOPIC, message).get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+			
+			// Sending the message to kafka topic queue
+			this.kafkaTemplate.send(Utilities.KAFKA_TOPIC, message).get();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@GetMapping("{id}/messages")
@@ -143,22 +153,21 @@ public class ChatController {
 		return new ResponseEntity<List<Message>>(this.messageService.findByChat(chat), HttpStatus.OK);
 
 	}
-	
-    //    -------------- WebSocket API ----------------
-    @MessageMapping("/sendMessage")
-    @SendTo("/topic/group")
-    public Message broadcastGroupMessage(@Payload Message message) {
-        //Sending this message to all the subscribers
-        return message;
-    }
 
-    @MessageMapping("/newUser")
-    @SendTo("/topic/group")
-    public Message addUser(@Payload Message message,
-                           SimpMessageHeaderAccessor headerAccessor) {
-        // Add user in web socket session
-        headerAccessor.getSessionAttributes().put("username", message.getSender());
-        return message;
-    }
+	// -------------- WebSocket API ----------------
+	@MessageMapping("/sendMessage")
+	@SendTo("/topic/group")
+	public Message broadcastGroupMessage(@Payload Message message) {
+		// Sending this message to all the subscribers
+		return message;
+	}
+
+	@MessageMapping("/newUser")
+	@SendTo("/topic/group")
+	public Message addUser(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
+		// Add user in web socket session
+		headerAccessor.getSessionAttributes().put("username", message.getSender());
+		return message;
+	}
 
 }

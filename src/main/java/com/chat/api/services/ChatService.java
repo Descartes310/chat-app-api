@@ -13,5 +13,5 @@ public interface ChatService {
 	
 	List<Chat> findByUsers(User user);
 	
-	List<Chat> findByUsers(List<User> users);
+	List<Chat> findByUsers(User u1, User u2);
 }

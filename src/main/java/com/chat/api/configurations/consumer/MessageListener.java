@@ -18,7 +18,6 @@ public class MessageListener {
             groupId = Utilities.GROUP_ID
     )
     public void listen(Message message) {
-        System.out.println("sending via kafka listener..");
         template.convertAndSend("/topic/group", message);
     }
 }

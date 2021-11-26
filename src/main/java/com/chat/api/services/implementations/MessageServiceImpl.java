@@ -26,7 +26,7 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public List<Message> findByChat(Chat chat) {
-		return this.messageRepository.findByChat(chat);
+		return this.messageRepository.findByChatOrderByIdAsc(chat);
 	}
-	
+
 }
